@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calyra — Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="spinner-overlay">
+    <div class="spinner"></div>
+    <p>Loading your dashboard…</p>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <div class="dashboard-layout">
+    <!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="sidebar-logo">
+          <div class="logo-mark">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <span>Calyra</span>
+        </a>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Loading…</div>
+          <div class="user-email" id="sidebarEmail">…</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <button class="nav-item active" onclick="navigateTo('overview', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Overview
+        </button>
+        <button class="nav-item" onclick="navigateTo('analytics', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </button>
+
+        <div class="nav-section-label">Calculators</div>
+        <button class="nav-item" onclick="navigateTo('calculators', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+          All Calculators
+        </button>
+        <button class="nav-item" onclick="navigateTo('history', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          History
+        </button>
+        <button class="nav-item" onclick="navigateTo('insights', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2L12 12"/></svg>
+          Smart Insights
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-item" onclick="toggleThemeDash()">
+          <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Dark Mode
+        </button>
+        <button class="nav-item" onclick="logout()" style="color:#c53030;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ══════════════════════════════════════ -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
+          <h1 class="topbar-title" id="topbarTitle">Overview</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="theme-toggle" onclick="toggleThemeDash()" aria-label="Toggle dark mode">
+            <svg id="themeIconTop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <select id="currencySelector" class="currency-dropdown">
+  <option value="USD">$ USD</option>
+  <option value="BDT">৳ BDT</option>
+  <option value="EUR">€ EUR</option>
+  <option value="INR">₹ INR</option>
+</select>
+          <button class="btn btn-sm btn-danger" onclick="logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- Pages -->
+      <div class="page-content">
+
+        <!-- ╔══ OVERVIEW PAGE ══════════════════════════════╗ -->
+        <div class="page active" id="page-overview">
+          <div class="welcome-banner">
+            <div class="welcome-text">
+              <h2 id="welcomeMsg">Welcome back!</h2>
+              <p id="welcomeSub">Here's your business performance at a glance.</p>
+            </div>
+            <div class="welcome-icon">📊</div>
+          </div>
+
+          <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+              <div class="stat-icon green">💰</div>
+              <div class="stat-value" id="statCalcs">0</div>
+              <div class="stat-label">Saved Calculations</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon pink">📈</div>
+              <div class="stat-value" id="statProfit">$0</div>
+              <div class="stat-label">Latest Profit</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue">🎯</div>
+              <div class="stat-value" id="statROI">0%</div>
+              <div class="stat-label">Latest ROI</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">🔥</div>
+              <div class="stat-value" id="statStreak">0</div>
+              <div class="stat-label">Days Active</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Recent Activity</div>
+                  <div class="card-subtitle">Your last saved calculations</div>
+                </div>
+                <button class="btn btn-sm btn-secondary" onclick="navigateTo('history', document.querySelector('.nav-item[onclick*=history]'))">View All</button>
+              </div>
+              <div id="recentActivity" class="history-list">
+                <div class="empty-state">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <p>No calculations yet. Try a calculator!</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Quick Tools</div>
+                  <div class="card-subtitle">Jump right in</div>
+                </div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-secondary" onclick="navigateTo('calculators', document.querySelector('.nav-item[onclick*=calculator]')); switchCalc('profit')">
+                  💹 Profit Calculator
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('calculators', document.querySelector('.nav-item[onclick*=calculator]')); switchCalc('roi')">
+                  📊 ROI Calculator
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('calculators', document.querySelector('.nav-item[onclick*=calculator]')); switchCalc('breakeven')">
+                  🎯 Break-even Analysis
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('calculators', document.querySelector('.nav-item[onclick*=calculator]')); switchCalc('cashflow')">
+                  💸 Cash Flow Calculator
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ╔══ ANALYTICS PAGE ══════════════════════════════╗ -->
+        <div class="page" id="page-analytics">
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Profit Trend</div>
+                  <div class="card-subtitle">Profit from saved calculations</div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="profitChart"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Revenue vs Expenses</div>
+                  <div class="card-subtitle">Comparative analysis</div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">ROI Growth</div>
+                <div class="card-subtitle">Return on investment over time</div>
+              </div>
+            </div>
+            <div class="chart-container" style="height:200px;">
+              <canvas id="roiChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- ╔══ CALCULATORS PAGE ═════════════════════════════╗ -->
+        <div class="page" id="page-calculators">
+          <div class="calc-tabs" id="calcTabs">
+            <button class="calc-tab active" onclick="switchCalc('profit', this)">💹 Profit</button>
+            <button class="calc-tab" onclick="switchCalc('pricing', this)">🏷️ Pricing</button>
+            <button class="calc-tab" onclick="switchCalc('breakeven', this)">🎯 Break-even</button>
+            <button class="calc-tab" onclick="switchCalc('roi', this)">📊 ROI</button>
+            <button class="calc-tab" onclick="switchCalc('cashflow', this)">💸 Cash Flow</button>
+            <button class="calc-tab" onclick="switchCalc('forecast', this)">🔮 Forecast</button>
+            <button class="calc-tab" onclick="switchCalc('product', this)">📦 Product</button>
+            <button class="calc-tab" onclick="switchCalc('discount', this)">🏷 Discount</button>
+            <button class="calc-tab" onclick="switchCalc('goal', this)">🏆 Goal</button>
+          </div>
+
+          <!-- ── PROFIT CALCULATOR ──────────────────────── -->
+          <div class="calc-panel active card" id="calc-profit">
+            <div class="card-header">
+              <div>
+                <div class="card-title">💹 Profit Calculator</div>
+                <div class="card-subtitle">Calculate net profit, margin & markup</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Revenue / Sales (<span class="currencySymbol">$</span>)</label>
+                <input type="number" id="p_revenue" placeholder="e.g. 50000" min="0" oninput="calcProfit()">
+              </div>
+              <div class="calc-field">
+                <label>Cost of Goods Sold (<span class="currencySymbol">$</span>)</label>
+                <input type="number" id="p_cogs" placeholder="e.g. 30000" min="0" oninput="calcProfit()">
+              </div>
+              <div class="calc-field">
+                <label>Operating Expenses (<span class="currencySymbol">$</span>)</label>
+                <input type="number" id="p_opex" placeholder="e.g. 8000" min="0" oninput="calcProfit()">
+              </div>
+              <div class="calc-field">
+                <label>Tax Rate (%)</label>
+                <input type="number" id="p_tax" placeholder="e.g. 25" min="0" max="100" oninput="calcProfit()">
+              </div>
+            </div>
+            <div id="profitResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Net Profit</span><span class="value" id="p_netProfit">—</span></div>
+              <div class="result-row"><span class="label">Gross Profit</span><span class="value" id="p_grossProfit">—</span></div>
+              <div class="result-row"><span class="label">Gross Margin</span><span class="value" id="p_grossMargin">—</span></div>
+              <div class="result-row"><span class="label">Net Margin</span><span class="value" id="p_netMargin">—</span></div>
+              <div class="result-row"><span class="label">Markup %</span><span class="value" id="p_markup">—</span></div>
+            </div>
+            <div id="profitInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('profit')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Calculation
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('profit')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── PRICING CALCULATOR ─────────────────────── -->
+          <div class="calc-panel card" id="calc-pricing">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🏷️ Pricing Calculator</div>
+                <div class="card-subtitle">Find the optimal selling price</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Cost Price ($)</label>
+                <input type="number" id="pr_cost" placeholder="e.g. 20" min="0" oninput="calcPricing()">
+              </div>
+              <div class="calc-field">
+                <label>Desired Markup (%)</label>
+                <input type="number" id="pr_markup" placeholder="e.g. 50" min="0" oninput="calcPricing()">
+              </div>
+              <div class="calc-field">
+                <label>Desired Margin (%)</label>
+                <input type="number" id="pr_margin" placeholder="e.g. 33" min="0" max="99.9" oninput="calcPricingFromMargin()">
+              </div>
+              <div class="calc-field">
+                <label>Units to Sell</label>
+                <input type="number" id="pr_units" placeholder="e.g. 100" min="1" oninput="calcPricing()">
+              </div>
+            </div>
+            <div id="pricingResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Recommended Price</span><span class="value" id="pr_price">—</span></div>
+              <div class="result-row"><span class="label">Profit per Unit</span><span class="value" id="pr_unitProfit">—</span></div>
+              <div class="result-row"><span class="label">Total Revenue</span><span class="value" id="pr_totalRev">—</span></div>
+              <div class="result-row"><span class="label">Total Profit</span><span class="value" id="pr_totalProfit">—</span></div>
+            </div>
+            <div id="pricingInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('pricing')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Calculation
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('pricing')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── BREAK-EVEN CALCULATOR ──────────────────── -->
+          <div class="calc-panel card" id="calc-breakeven">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🎯 Break-even Calculator</div>
+                <div class="card-subtitle">Find the sales volume needed to cover costs</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Fixed Costs ($)</label>
+                <input type="number" id="be_fixed" placeholder="e.g. 10000" min="0" oninput="calcBreakeven()">
+              </div>
+              <div class="calc-field">
+                <label>Variable Cost per Unit ($)</label>
+                <input type="number" id="be_varCost" placeholder="e.g. 15" min="0" oninput="calcBreakeven()">
+              </div>
+              <div class="calc-field">
+                <label>Selling Price per Unit ($)</label>
+                <input type="number" id="be_price" placeholder="e.g. 25" min="0" oninput="calcBreakeven()">
+              </div>
+              <div class="calc-field">
+                <label>Expected Sales (units)</label>
+                <input type="number" id="be_sales" placeholder="e.g. 1500" min="0" oninput="calcBreakeven()">
+              </div>
+            </div>
+            <div id="breakevenResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Break-even Units</span><span class="value" id="be_units">—</span></div>
+              <div class="result-row"><span class="label">Break-even Revenue</span><span class="value" id="be_revenue">—</span></div>
+              <div class="result-row"><span class="label">Contribution Margin</span><span class="value" id="be_contribution">—</span></div>
+              <div class="result-row"><span class="label">Safety Margin</span><span class="value" id="be_safety">—</span></div>
+              <div class="result-row"><span class="label">Profit at Expected Sales</span><span class="value" id="be_profit">—</span></div>
+            </div>
+            <div id="breakevenInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('breakeven')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('breakeven')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── ROI CALCULATOR ─────────────────────────── -->
+          <div class="calc-panel card" id="calc-roi">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📊 ROI Calculator</div>
+                <div class="card-subtitle">Measure return on investment</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Initial Investment ($)</label>
+                <input type="number" id="roi_invest" placeholder="e.g. 50000" min="0" oninput="calcROI()">
+              </div>
+              <div class="calc-field">
+                <label>Final Value / Revenue ($)</label>
+                <input type="number" id="roi_return" placeholder="e.g. 75000" min="0" oninput="calcROI()">
+              </div>
+              <div class="calc-field">
+                <label>Period (months)</label>
+                <input type="number" id="roi_period" placeholder="e.g. 12" min="1" oninput="calcROI()">
+              </div>
+              <div class="calc-field">
+                <label>Annual Operating Cost ($)</label>
+                <input type="number" id="roi_opCost" placeholder="e.g. 5000" min="0" oninput="calcROI()">
+              </div>
+            </div>
+            <div id="roiResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">ROI</span><span class="value" id="roi_roi">—</span></div>
+              <div class="result-row"><span class="label">Net Gain / Loss</span><span class="value" id="roi_gain">—</span></div>
+              <div class="result-row"><span class="label">Annualized ROI</span><span class="value" id="roi_annual">—</span></div>
+              <div class="result-row"><span class="label">Payback Period</span><span class="value" id="roi_payback">—</span></div>
+            </div>
+            <div id="roiInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('roi')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('roi')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── CASH FLOW CALCULATOR ───────────────────── -->
+          <div class="calc-panel card" id="calc-cashflow">
+            <div class="card-header">
+              <div>
+                <div class="card-title">💸 Cash Flow Calculator</div>
+                <div class="card-subtitle">Track and forecast business cash flows</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Opening Balance ($)</label>
+                <input type="number" id="cf_opening" placeholder="e.g. 20000" oninput="calcCashFlow()">
+              </div>
+              <div class="calc-field">
+                <label>Total Cash Inflows ($)</label>
+                <input type="number" id="cf_inflows" placeholder="e.g. 80000" min="0" oninput="calcCashFlow()">
+              </div>
+              <div class="calc-field">
+                <label>Operating Expenses ($)</label>
+                <input type="number" id="cf_opex" placeholder="e.g. 30000" min="0" oninput="calcCashFlow()">
+              </div>
+              <div class="calc-field">
+                <label>COGS ($)</label>
+                <input type="number" id="cf_cogs" placeholder="e.g. 25000" min="0" oninput="calcCashFlow()">
+              </div>
+              <div class="calc-field">
+                <label>Loan / Debt Repayments ($)</label>
+                <input type="number" id="cf_debt" placeholder="e.g. 5000" min="0" oninput="calcCashFlow()">
+              </div>
+              <div class="calc-field">
+                <label>Tax Payments ($)</label>
+                <input type="number" id="cf_tax" placeholder="e.g. 4000" min="0" oninput="calcCashFlow()">
+              </div>
+            </div>
+            <div id="cashflowResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Closing Balance</span><span class="value" id="cf_closing">—</span></div>
+              <div class="result-row"><span class="label">Net Cash Flow</span><span class="value" id="cf_net">—</span></div>
+              <div class="result-row"><span class="label">Total Outflows</span><span class="value" id="cf_outflows">—</span></div>
+              <div class="result-row"><span class="label">Cash Flow Ratio</span><span class="value" id="cf_ratio">—</span></div>
+            </div>
+            <div id="cashflowInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('cashflow')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('cashflow')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── REVENUE FORECAST ──────────────────────── -->
+          <div class="calc-panel card" id="calc-forecast">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🔮 Revenue Forecast</div>
+                <div class="card-subtitle">Project future revenue based on growth</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Current Monthly Revenue ($)</label>
+                <input type="number" id="fc_revenue" placeholder="e.g. 10000" min="0" oninput="calcForecast()">
+              </div>
+              <div class="calc-field">
+                <label>Monthly Growth Rate (%)</label>
+                <input type="number" id="fc_growth" placeholder="e.g. 5" oninput="calcForecast()">
+              </div>
+              <div class="calc-field">
+                <label>Forecast Period (months)</label>
+                <input type="number" id="fc_months" placeholder="e.g. 12" min="1" max="120" oninput="calcForecast()">
+              </div>
+              <div class="calc-field">
+                <label>Monthly Fixed Cost ($)</label>
+                <input type="number" id="fc_cost" placeholder="e.g. 5000" min="0" oninput="calcForecast()">
+              </div>
+            </div>
+            <div id="forecastResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Projected Revenue (end)</span><span class="value" id="fc_projected">—</span></div>
+              <div class="result-row"><span class="label">Total Revenue (period)</span><span class="value" id="fc_total">—</span></div>
+              <div class="result-row"><span class="label">Total Profit (period)</span><span class="value" id="fc_profit">—</span></div>
+              <div class="result-row"><span class="label">Revenue CAGR</span><span class="value" id="fc_cagr">—</span></div>
+            </div>
+            <div id="forecastInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('forecast')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('forecast')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── PRODUCT PROFIT ANALYZER ───────────────── -->
+          <div class="calc-panel card" id="calc-product">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📦 Product Profit Analyzer</div>
+                <div class="card-subtitle">Analyze profitability per product</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Selling Price ($)</label>
+                <input type="number" id="pp_price" placeholder="e.g. 49.99" min="0" oninput="calcProduct()">
+              </div>
+              <div class="calc-field">
+                <label>Unit Cost ($)</label>
+                <input type="number" id="pp_cost" placeholder="e.g. 18" min="0" oninput="calcProduct()">
+              </div>
+              <div class="calc-field">
+                <label>Units Sold (monthly)</label>
+                <input type="number" id="pp_units" placeholder="e.g. 200" min="0" oninput="calcProduct()">
+              </div>
+              <div class="calc-field">
+                <label>Overhead Allocation ($)</label>
+                <input type="number" id="pp_overhead" placeholder="e.g. 500" min="0" oninput="calcProduct()">
+              </div>
+              <div class="calc-field">
+                <label>Shipping per Unit ($)</label>
+                <input type="number" id="pp_shipping" placeholder="e.g. 3" min="0" oninput="calcProduct()">
+              </div>
+              <div class="calc-field">
+                <label>Return Rate (%)</label>
+                <input type="number" id="pp_returns" placeholder="e.g. 2" min="0" max="100" oninput="calcProduct()">
+              </div>
+            </div>
+            <div id="productResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Monthly Net Profit</span><span class="value" id="pp_netProfit">—</span></div>
+              <div class="result-row"><span class="label">Profit Margin</span><span class="value" id="pp_margin">—</span></div>
+              <div class="result-row"><span class="label">Break-even Units</span><span class="value" id="pp_be">—</span></div>
+              <div class="result-row"><span class="label">Effective Unit Profit</span><span class="value" id="pp_unitProfit">—</span></div>
+            </div>
+            <div id="productInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('product')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('product')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── DISCOUNT CALCULATOR ───────────────────── -->
+          <div class="calc-panel card" id="calc-discount">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🏷 Discount Calculator</div>
+                <div class="card-subtitle">Evaluate discount impact on profits</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Original Price ($)</label>
+                <input type="number" id="dc_original" placeholder="e.g. 100" min="0" oninput="calcDiscount()">
+              </div>
+              <div class="calc-field">
+                <label>Discount Rate (%)</label>
+                <input type="number" id="dc_discount" placeholder="e.g. 20" min="0" max="100" oninput="calcDiscount()">
+              </div>
+              <div class="calc-field">
+                <label>Cost Price ($)</label>
+                <input type="number" id="dc_cost" placeholder="e.g. 60" min="0" oninput="calcDiscount()">
+              </div>
+              <div class="calc-field">
+                <label>Units Sold</label>
+                <input type="number" id="dc_units" placeholder="e.g. 50" min="0" oninput="calcDiscount()">
+              </div>
+            </div>
+            <div id="discountResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Discounted Price</span><span class="value" id="dc_price">—</span></div>
+              <div class="result-row"><span class="label">Savings per Unit</span><span class="value" id="dc_saving">—</span></div>
+              <div class="result-row"><span class="label">Profit per Unit</span><span class="value" id="dc_unitProfit">—</span></div>
+              <div class="result-row"><span class="label">Total Revenue</span><span class="value" id="dc_totalRev">—</span></div>
+              <div class="result-row"><span class="label">Total Profit</span><span class="value" id="dc_totalProfit">—</span></div>
+            </div>
+            <div id="discountInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('discount')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('discount')">Clear</button>
+            </div>
+          </div>
+
+          <!-- ── GOAL CALCULATOR ───────────────────────── -->
+          <div class="calc-panel card" id="calc-goal">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🏆 Goal Calculator</div>
+                <div class="card-subtitle">Reverse-engineer your sales target</div>
+              </div>
+            </div>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label>Target Profit ($)</label>
+                <input type="number" id="gl_targetProfit" placeholder="e.g. 25000" min="0" oninput="calcGoal()">
+              </div>
+              <div class="calc-field">
+                <label>Selling Price per Unit ($)</label>
+                <input type="number" id="gl_price" placeholder="e.g. 50" min="0" oninput="calcGoal()">
+              </div>
+              <div class="calc-field">
+                <label>Variable Cost per Unit ($)</label>
+                <input type="number" id="gl_varCost" placeholder="e.g. 20" min="0" oninput="calcGoal()">
+              </div>
+              <div class="calc-field">
+                <label>Fixed Costs ($)</label>
+                <input type="number" id="gl_fixed" placeholder="e.g. 5000" min="0" oninput="calcGoal()">
+              </div>
+              <div class="calc-field">
+                <label>Timeline (months)</label>
+                <input type="number" id="gl_months" placeholder="e.g. 6" min="1" oninput="calcGoal()">
+              </div>
+              <div class="calc-field">
+                <label>Marketing Budget ($)</label>
+                <input type="number" id="gl_marketing" placeholder="e.g. 2000" min="0" oninput="calcGoal()">
+              </div>
+            </div>
+            <div id="goalResult" class="calc-result">
+              <div class="result-row highlight"><span class="label">Units Needed</span><span class="value" id="gl_units">—</span></div>
+              <div class="result-row"><span class="label">Revenue Required</span><span class="value" id="gl_revenue">—</span></div>
+              <div class="result-row"><span class="label">Daily Sales Target</span><span class="value" id="gl_daily">—</span></div>
+              <div class="result-row"><span class="label">Monthly Sales Target</span><span class="value" id="gl_monthly">—</span></div>
+            </div>
+            <div id="goalInsight" class="insight-box"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" onclick="saveCalculation('goal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+              <button class="btn btn-ghost" onclick="clearCalc('goal')">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ╔══ HISTORY PAGE ════════════════════════════════╗ -->
+        <div class="page" id="page-history">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Calculation History</div>
+                <div class="card-subtitle">All your saved calculations</div>
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="clearHistory()" id="clearHistoryBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                Clear All
+              </button>
+            </div>
+            <div id="fullHistory" class="history-list"></div>
+          </div>
+        </div>
+
+        <!-- ╔══ INSIGHTS PAGE ═══════════════════════════════╗ -->
+        <div class="page" id="page-insights">
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🧠 Smart Business Insights</div>
+                <div class="card-subtitle">AI-driven suggestions based on your calculations</div>
+              </div>
+            </div>
+            <div id="smartInsightsContainer" class="insights-grid"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📋 Business Health Score</div>
+                <div class="card-subtitle">Overall assessment of your metrics</div>
+              </div>
+            </div>
+            <div id="healthScore" style="text-align:center;padding:20px 0;">
+              <div style="font-family:var(--font-display);font-size:3rem;color:var(--green-600);" id="healthScoreVal">—</div>
+              <div style="font-size:0.875rem;color:var(--gray-500);margin-top:4px;" id="healthScoreLabel">Save some calculations to see your score</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end page-content -->
+    </div><!-- end main-content -->
+  </div><!-- end dashboard-layout -->
+
+  <script src="script.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
